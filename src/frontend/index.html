@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华为云无服务器电商平台</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .header p { color: #aaa; font-size: 1.1em; }
+        
+        .badges { margin-top: 20px; }
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .badge.success { background: rgba(0,200,100,0.2); color: #00c864; border: 1px solid rgba(0,200,100,0.3); }
+        .badge.info { background: rgba(0,150,255,0.2); color: #0096ff; border: 1px solid rgba(0,150,255,0.3); }
+        
+        /* Cloud Info */
+        .cloud-info {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #888;
+        }
+        .cloud-info strong { color: #00d2ff; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; }
+        .tab {
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .tab:hover { background: rgba(255,255,255,0.1); }
+        .tab.active {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            border: none;
+        }
+        
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(0,210,255,0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+        .card-title { font-size: 1.2em; font-weight: 600; margin-bottom: 10px; }
+        .card-desc { color: #888; font-size: 0.9em; line-height: 1.6; }
+        
+        /* Products */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .product-card:hover { transform: scale(1.02); border-color: rgba(0,210,255,0.5); }
+        .product-img {
+            height: 180px;
+            background: linear-gradient(135deg, #2a2a4e, #1a1a2e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+        }
+        .product-info { padding: 20px; }
+        .product-name { font-size: 1.1em; font-weight: 600; margin-bottom: 8px; }
+        .product-desc { color: #888; font-size: 0.85em; margin-bottom: 15px; }
+        .product-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00c864;
+            margin-bottom: 15px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            color: white;
+        }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(0,210,255,0.3); }
+        
+        /* Cart Section */
+        .cart-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+        .cart-items { margin: 20px 0; }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: 600; }
+        .cart-item-price { color: #00c864; margin-top: 5px; }
+        .cart-item-actions { display: flex; align-items: center; gap: 10px; }
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(0,210,255,0.2);
+            color: #00d2ff;
+            cursor: pointer;
+        }
+        .remove-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255,0,0,0.2);
+            color: #ff4444;
+            cursor: pointer;
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        /* Auth Forms */
+        .auth-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .auth-form {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+        }
+        .auth-form h3 { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #aaa; }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+        }
+        .form-group input:focus { outline: none; border-color: #00d2ff; }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        .message.success { background: rgba(0,200,100,0.2); color: #00c864; display: block; }
+        .message.error { background: rgba(255,0,0,0.2); color: #ff4444; display: block; }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            margin-top: 50px;
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🛒 华为云无服务器电商平台</h1>
+            <p>基于 FunctionGraph + RDS MySQL + APIG 构建的 Serverless 电商解决方案</p>
+            <div class="badges">
+                <span class="badge success">✅ 部署成功</span>
+                <span class="badge info">📊 RDS MySQL</span>
+                <span class="badge info">📦 OBS</span>
+                <span class="badge info">☁️ FunctionGraph</span>
+            </div>
+            <div class="cloud-info">
+                <strong>云资源信息：</strong><br>
+                VPC: ff3e4e14-d8e7-4d62-82de-ada0a3c453b8<br>
+                Subnet: 08529dab-7a5d-494b-bb7a-78fbd1dd28f0<br>
+                RDS MySQL: 10.2.1.135:3306<br>
+                OBS: ecommerce-demo-assets
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('products')">🛍️ 商品列表</div>
+            <div class="tab" onclick="showTab('cart')">🛒 购物车</div>
+            <div class="tab" onclick="showTab('auth')">🔐 用户中心</div>
+            <div class="tab" onclick="showTab('orders')">📋 订单管理</div>
+        </div>
+        
+        <!-- Products Tab -->
+        <div id="products" class="tab-content">
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-img">📱</div>
+                    <div class="product-info">
+                        <div class="product-name">iPhone 15 Pro Max</div>
+                        <div class="product-desc">256GB 钛金属设计 A17 Pro芯片</div>
+                        <div class="product-price">¥9,999</div>
+                        <button class="btn btn-primary" onclick="addToCart('prod-001', 'iPhone 15 Pro Max', 9999)">加入购物车</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">💻</div>
+                    <div class="product-info">
+                        <div class="product-name">MacBook Pro 16"</div>
+                        <div class="product-desc">M3 Max芯片 36GB 1TB</div>
+                        <div class="product-price">¥24,999</div>
+                        <button class="btn btn-primary" onclick="addToCart('prod-002', 'MacBook Pro 16', 24999)">加入购物车</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">⌚</div>
+                    <div class="product-info">
+                        <div class="product-name">Apple Watch Ultra 2</div>
+                        <div class="product-desc">49mm 钛金属表壳</div>
+                        <div class="product-price">¥7,499</div>
+                        <button class="btn btn-primary" onclick="addToCart('prod-003', 'Apple Watch Ultra 2', 7499)">加入购物车</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">🎧</div>
+                    <div class="product-info">
+                        <div class="product-name">AirPods Pro</div>
+                        <div class="product-desc">主动降噪 空间音频</div>
+                        <div class="product-price">¥1,899</div>
+                        <button class="btn btn-primary" onclick="addToCart('prod-004', 'AirPods Pro', 1899)">加入购物车</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">📺</div>
+                    <div class="product-info">
+                        <div class="product-name">华为智慧屏 V5 Pro</div>
+                        <div class="product-desc">85英寸 Mini LED 鸿蒙系统</div>
+                        <div class="product-price">¥15,999</div>
+                        <button class="btn btn-primary" onclick="addToCart('prod-005', '华为智慧屏 V5 Pro', 15999)">加入购物车</button>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-img">📷</div>
+                    <div class="product-info">
+                        <div class="product-name">华为 Mate 60 Pro+</div>
+                        <div class="product-desc">16GB+512GB 昆仑玻璃</div>
+                        <div class="product-price">¥8,999</div>
+                        <button class="btn btn-primary" onclick="addToCart('prod-006', '华为 Mate 60 Pro+', 8999)">加入购物车</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cart Tab -->
+        <div id="cart" class="tab-content hidden">
+            <div class="cart-section">
+                <h2>🛒 我的购物车</h2>
+                <div class="cart-items" id="cartItems">
+                    <p style="color: #888; text-align: center; padding: 40px;">购物车是空的</p>
+                </div>
+                <div class="cart-total">
+                    <span>总计</span>
+                    <span id="cartTotal">¥0</span>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 20px;" onclick="checkout()">🛍️ 提交订单</button>
+            </div>
+        </div>
+        
+        <!-- Auth Tab -->
+        <div id="auth" class="tab-content hidden">
+            <div class="auth-section">
+                <div class="auth-form">
+                    <h3>📝 用户注册</h3>
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="regUsername" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="regEmail" placeholder="请输入邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="regPassword" placeholder="请输入密码">
+                    </div>
+                    <button class="btn btn-primary" onclick="register()">注册</button>
+                    <div id="regMsg" class="message"></div>
+                </div>
+                <div class="auth-form">
+                    <h3>🔑 用户登录</h3>
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="loginUsername" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="loginPassword" placeholder="请输入密码">
+                    </div>
+                    <button class="btn btn-primary" onclick="login()">登录</button>
+                    <div id="loginMsg" class="message"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Orders Tab -->
+        <div id="orders" class="tab-content hidden">
+            <div class="cart-section">
+                <h2>📋 我的订单</h2>
+                <div id="orderList">
+                    <p style="color: #888; text-align: center; padding: 40px;">暂无订单</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>🏢 华为云无服务器电商平台 | 基于 FunctionGraph + RDS MySQL + APIG + OBS</p>
+            <p style="margin-top: 10px;">部署时间: 2026-08-20</p>
+        </div>
+    </div>
+    
+    <script>
+        // Data
+        let cart = [];
+        let orders = [];
+        let currentUser = null;
+        
+        // Tab Navigation
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+        
+        // Cart Functions
+        function addToCart(productId, productName, price) {
+            const existing = cart.find(item => item.productId === productId);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ productId, productName, price, quantity: 1 });
+            }
+            renderCart();
+            showMessage('products', 'success', `已添加 ${productName} 到购物车`);
+        }
+        
+        function updateQty(productId, delta) {
+            const item = cart.find(i => i.productId === productId);
+            if (item) {
+                item.quantity += delta;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.productId !== productId);
+                }
+                renderCart();
+            }
+        }
+        
+        function removeFromCart(productId) {
+            cart = cart.filter(i => i.productId !== productId);
+            renderCart();
+        }
+        
+        function renderCart() {
+            const cartEl = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartEl.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">购物车是空的</p>';
+                totalEl.textContent = '¥0';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price * item.quantity;
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.productName}</div>
+                            <div class="cart-item-price">¥${item.price} × ${item.quantity}</div>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button class="qty-btn" onclick="updateQty('${item.productId}', -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateQty('${item.productId}', 1)">+</button>
+                            <button class="remove-btn" onclick="removeFromCart('${item.productId}')">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+            cartEl.innerHTML = html;
+            totalEl.textContent = '¥' + total.toLocaleString();
+        }
+        
+        function checkout() {
+            if (cart.length === 0) {
+                alert('购物车是空的！');
+                return;
+            }
+            const orderId = 'ORD' + Date.now();
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            orders.push({ orderId, items: [...cart], total, status: '已下单', date: new Date().toLocaleString() });
+            alert(`订单提交成功！\n订单号：${orderId}\n金额：¥${total.toLocaleString()}`);
+            cart = [];
+            renderCart();
+            renderOrders();
+            showTab('orders');
+        }
+        
+        function renderOrders() {
+            const orderEl = document.getElementById('orderList');
+            if (orders.length === 0) {
+                orderEl.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">暂无订单</p>';
+                return;
+            }
+            let html = '';
+            orders.forEach(order => {
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">订单号：${order.orderId}</div>
+                            <div class="cart-item-price">${order.items.length}件商品 | ${order.date}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #00c864; font-weight: bold;">¥${order.total.toLocaleString()}</div>
+                            <div style="color: #00d2ff; font-size: 0.9em; margin-top: 5px;">${order.status}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            orderEl.innerHTML = html;
+        }
+        
+        // Auth Functions
+        function register() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            if (!username || !password) {
+                showMessage('regMsg', 'error', '请填写完整信息');
+                return;
+            }
+            showMessage('regMsg', 'success', `用户 ${username} 注册成功！\n(演示系统，实际请求将发送到 FunctionGraph)`);
+        }
+        
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            if (!username || !password) {
+                showMessage('loginMsg', 'error', '请填写完整信息');
+                return;
+            }
+            currentUser = username;
+            showMessage('loginMsg', 'success', `欢迎回来，${username}！\nToken: <demo-token-redacted>`);
+        }
+        
+        function showMessage(id, type, text) {
+            const el = document.getElementById(id);
+            el.className = `message ${type}`;
+            el.textContent = text;
+            setTimeout(() => {
+                el.className = 'message';
+                el.textContent = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
